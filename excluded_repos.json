@@ -1,0 +1,28 @@
+{
+  "repositories": [
+    {
+      "platform": "github",
+      "owner": "example-org",
+      "repo_pattern": "*-qa",
+      "repo_name": null,
+      "added_date": "2026-03-23",
+      "reason": "QA test automation suite"
+    },
+    {
+      "platform": "github",
+      "owner": "example-org",
+      "repo_pattern": "*-test",
+      "repo_name": null,
+      "added_date": "2026-03-23",
+      "reason": "Unsupported technology test suite"
+    },
+    {
+      "platform": "bitbucket",
+      "owner": "example-workspace",
+      "repo_pattern": "qa-*",
+      "repo_name": null,
+      "added_date": "2026-03-23",
+      "reason": "QA automation or unsupported tech stack"
+    }
+  ]
+}
