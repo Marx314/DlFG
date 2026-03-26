@@ -132,6 +132,7 @@ def _update_developer(
             "email": author_email,
             "latest_commit_date": commit_date,
             "repositories": [],
+            "repo_platforms": {repo_full_name: platform},
             "commits": 0,
             "platforms": [platform],
             **(extra_data or {}),
@@ -144,6 +145,7 @@ def _update_developer(
 
     if repo_full_name not in developers[author_name]["repositories"]:
         developers[author_name]["repositories"].append(repo_full_name)
+        developers[author_name]["repo_platforms"][repo_full_name] = platform
 
 
 def stream_github_developers(
@@ -229,12 +231,6 @@ def stream_bitbucket_developers(
     logger.info(f"[Bitbucket] Starting query for scope: {scope}")
 
     client = BitbucketClient(commit_cache=commit_cache)
-    try:
-        user = client.get_authenticated_user()
-        logger.info(f"[Bitbucket] Authenticated as: {user.get('name')}")
-    except Exception as e:
-        logger.error(f"[Bitbucket] Authentication failed: {e}")
-        return
 
     developers: Dict = {}
     skipped = 0
@@ -361,10 +357,8 @@ def _query_and_stream_developers(
 
     with ThreadPoolExecutor(max_workers=2, thread_name_prefix="platform") as pool:
         futures = []
-        if github_scope:
-            futures.append(pool.submit(run_stream, stream_github_developers, github_scope))
-        if bitbucket_scope:
-            futures.append(pool.submit(run_stream, stream_bitbucket_developers, bitbucket_scope))
+        futures.append(pool.submit(run_stream, stream_github_developers, github_scope))
+        futures.append(pool.submit(run_stream, stream_bitbucket_developers, bitbucket_scope))
 
         for future in as_completed(futures):
             exc = future.exception()

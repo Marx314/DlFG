@@ -56,6 +56,12 @@ class DataProcessor:
         new_repos = set(new_data.get("repositories", []))
         existing["repositories"] = list(existing_repos.union(new_repos))
 
+        # Merge repo platform mappings
+        existing_repo_platforms = existing.get("repo_platforms", {})
+        new_repo_platforms = new_data.get("repo_platforms", {})
+        existing_repo_platforms.update(new_repo_platforms)
+        existing["repo_platforms"] = existing_repo_platforms
+
         # Sum commits
         existing["commits"] = existing.get("commits", 0) + new_data.get("commits", 0)
 
@@ -82,16 +88,19 @@ class DataProcessor:
 
         dev_data = self.developers[dev_name]
         repositories = dev_data.get("repositories", [])
-        platforms = dev_data.get("platforms", [])
+        repo_platforms = dev_data.get("repo_platforms", {})
 
         if not repositories:
             return {}
 
-        # Build repository list with inferred platform
+        # Build repository list with stored platform info
         repo_list_with_platform = []
         for repo in repositories:
-            # Try to infer platform from repository format
-            platform = self._infer_platform_from_repo(repo, platforms)
+            # Use stored platform info, fall back to inference if not found
+            platform = repo_platforms.get(repo)
+            if not platform:
+                platforms = dev_data.get("platforms", [])
+                platform = self._infer_platform_from_repo(repo, platforms)
             if platform:
                 # Parse owner/project and repo name
                 parts = repo.split("/", 1)

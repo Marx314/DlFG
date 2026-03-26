@@ -113,7 +113,7 @@ class BitbucketClient:
             request_params = {**params, "start": start, "limit": limit}
             data = self._request("GET", endpoint, params=request_params)
 
-            if not data.get("values"):
+            if data is None or not data.get("values"):
                 break
 
             items.extend(data["values"])
@@ -141,6 +141,8 @@ class BitbucketClient:
 
         def _make_request():
             response = self.session.request(method, url, **kwargs)
+            if response.status_code == 404:
+                return None
             response.raise_for_status()
             return response.json()
 
@@ -202,7 +204,7 @@ class BitbucketClient:
                 params={"start": start, "limit": limit},
             )
 
-            if not data.get("values"):
+            if data is None or not data.get("values"):
                 break
 
             # Filter commits by date

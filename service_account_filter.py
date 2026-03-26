@@ -70,7 +70,4 @@ class ServiceAccountFilter:
             else:
                 service_count += 1
 
-        if service_count > 0:
-            logger.info(f"Filtered out {service_count} service accounts")
-
         return filtered

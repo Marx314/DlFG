@@ -121,6 +121,8 @@ class GitHubClient:
 
         def _make_request():
             response = self.session.request(method, url, **kwargs)
+            if response.status_code == 409:
+                return None
             response.raise_for_status()
             return response.json()
 
@@ -207,6 +209,9 @@ class GitHubClient:
 
         # Fetch from API if not cached
         commits = self._paginate(f"/repos/{owner}/{repo}/commits", since=SINCE_DATE)
+
+        if commits is None:
+            return []
 
         # Store in cache
         if self.commit_cache and commits:
